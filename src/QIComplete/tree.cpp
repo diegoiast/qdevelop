@@ -36,12 +36,12 @@ Tree* Tree::buildInheritanceTree(const QString &className)
 
 	tagEntry entry;
 	tagFileInfo info;
-	tagFile *tfile = tagsOpen(parent->tagsFilePath.toAscii(), &info);
+	tagFile *tfile = tagsOpen(parent->tagsFilePath.toLatin1(), &info);
 
 	//brc: split namespace part and classname
 	char nbuffer[256];
 	char *nspace = NULL;
-	strncpy(nbuffer, className.toAscii(), 256);
+	strncpy(nbuffer, className.toLatin1(), 256);
 	nbuffer[255] = '\0';
 	char *cname = nbuffer;
 	char *p = nbuffer;
@@ -129,15 +129,14 @@ Tree* Tree::buildInheritanceTree(const QString &className)
 							char *buffer = NULL;
 							//char *inherit = strtok(allinherits, ",");
 							QString inherit = allinherits.section(",", 0, 0);
-							while (inherit != NULL)
-							{
-								tree->addTreeChild(inherit);
+                            while (!inherit.isEmpty()) {
+                                tree->addTreeChild(inherit);
 
 								/* next token */
 								//inherit = strtok(buffer, ",");
 								inherit = QString(buffer).section(",", 0, 0);
-							}
-							//free(allinherits);
+                            }
+                            //free(allinherits);
 							goto end;
 						}
 					}
@@ -217,7 +216,7 @@ TagList Tree::findEntries(const Expression * exp, const Scope * scope)
 
 	tagEntry entry;
 	tagFileInfo info;
-	tagFile *tfile = tagsOpen(parent->tagsFilePath.toAscii(), &info);
+	tagFile *tfile = tagsOpen(parent->tagsFilePath.toLatin1(), &info);
 	char lasttag[256] = "";	/* store last tag to avoid duplicates */
 
 	/* create an inheritance tree of our class or current scope, depending what we want to complete */
@@ -240,7 +239,7 @@ TagList Tree::findEntries(const Expression * exp, const Scope * scope)
 	{
 		/* we can do a binary search for function definitions */
 		if (exp->access == AccessInFunction
-		        && tagsFind(tfile, &entry, exp->function.toAscii(),
+		        && tagsFind(tfile, &entry, exp->function.toLatin1(),
 		                    TAG_FULLMATCH | TAG_OBSERVECASE) == TagSuccess)
 		{
 			do

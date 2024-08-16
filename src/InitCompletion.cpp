@@ -14,17 +14,17 @@
 #include "misc.h"
 #include "treeclasses.h"
 
+#include <QCoreApplication>
 #include <QDir>
-#include <QProcess>
 #include <QLibraryInfo>
 #include <QMetaType>
-#include <QTemporaryFile>
+#include <QProcess>
+#include <QRegExp>
 #include <QSqlDatabase>
-#include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlQuery>
+#include <QTemporaryFile>
 #include <QVariant>
-#include <QMetaType>
-#include <QCoreApplication>
 
 #ifdef _WIN32
 #define NEW_LINE "\r\n"
@@ -161,7 +161,7 @@ long InitCompletion::calculateHash(const QString &parsedText)
     foreach (s, includes)
     {
         for (int i = 0; i < s.length(); i++)
-            res += (i + 1) * s[i].toAscii();
+            res += (i + 1) * s[i].toLatin1();
     }
 
     return res;
@@ -585,14 +585,13 @@ void InitCompletion::populateQtDatabase()
      QFile f(QDir::tempPath()+"/qdevelopfilenames");
      if (!f.open(QIODevice::WriteOnly | QIODevice::Text))
          return;
-     f.write( files.join("\n").toAscii() );
-    f.close();
-    QProcess ctags;
-    if( ctags.execute(command) != 0 )
-    {
-    	emit showMessage( tr("Unable to launch %1").arg(command) );
-    	return;
-   	}
+     f.write(files.join("\n").toLatin1());
+     f.close();
+     QProcess ctags;
+     if (ctags.execute(command) != 0) {
+         emit showMessage(tr("Unable to launch %1").arg(command));
+         return;
+     }
     ctags.waitForFinished(-1);
     QFile file(QDir::tempPath()+"/qttags");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -607,8 +606,7 @@ void InitCompletion::populateQtDatabase()
     f.remove();
     QMap<QString, QString> inheritsList;
     QMap<QString, TagList> map;
-    foreach(QString s, read.split("\n", QString::SkipEmptyParts) )
-    {
+    foreach (QString s, read.split("\n", Qt::SkipEmptyParts)) {
         QString classname;
         Tag tag;
         if ( !s.isEmpty() && s.simplified().at(0) == '!' )
@@ -714,8 +712,7 @@ void InitCompletion::writeInheritanceToDB(QMap<QString, QString> inheritsList, Q
     while (it.hasNext())
     {
         it.next();
-        foreach(QString parent, it.value().split(",", QString::SkipEmptyParts ) )
-        {
+        foreach (QString parent, it.value().split(",", Qt::SkipEmptyParts)) {
             QString queryString = "insert into inheritance values(";
             queryString = queryString
                           + "'" + parent.replace("'", "$") + "', "

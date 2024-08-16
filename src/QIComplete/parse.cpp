@@ -74,25 +74,23 @@ char* Parse::scanForIdent(const char **expr)
 
 bool Parse::scanForFuncdef(const QString &expr)
 {
-	const char *pExpr = expr.toAscii();
-	char c;
-	while ((c = *pExpr) != '\0')
-	{
-		switch (c)
-		{
-		case ' ':
-		case '\t':
-		case '\n':
-			pExpr++;
+    const char *pExpr = expr.toLatin1();
+    char c;
+    while ((c = *pExpr) != '\0') {
+        switch (c) {
+        case ' ':
+        case '\t':
+        case '\n':
+            pExpr++;
 			continue;
 
 		case '(':
 			return true;
 		default:
 			return false;
-		}
-	}
-	return false;
+        }
+    }
+    return false;
 }
 
 QString Parse::getTypeOfToken(const QString &ident, const QString &className,
@@ -118,46 +116,40 @@ QString Parse::getTypeOfToken(const QString &ident, const QString &className,
 
 	tagFileInfo info;
 	tagEntry entry;
-	tagFile *tfile = tagsOpen(tagsFilePath.toAscii(), &info);
-	if (tfile && info.status.opened)
-	{
-		if (tagsFind(tfile, &entry, ident.toAscii(), TAG_OBSERVECASE | TAG_FULLMATCH) ==
-		        TagSuccess)
-		{
-			do
-			{
-				if (tree && !tree->isMemberOfScope(&entry, scope))
-					continue;
+    tagFile *tfile = tagsOpen(tagsFilePath.toLatin1(), &info);
+    if (tfile && info.status.opened) {
+        if (tagsFind(tfile, &entry, ident.toLatin1(), TAG_OBSERVECASE | TAG_FULLMATCH)
+            == TagSuccess) {
+            do {
+                if (tree && !tree->isMemberOfScope(&entry, scope))
+                    continue;
 
-				const char *kind = tagsField(&entry, "kind");
-				if (token_is_function)	/* only list if tag is a function */
-				{
-					if (!kind
-					        || (strcmp(kind, "function") && strcmp(kind, "prototype")))
-						continue;
-				}
-				else		/* or a variable */
-				{
-					//brc: add externvar for extern variables like cout
-					if (!kind
+                const char *kind = tagsField(&entry, "kind");
+                if (token_is_function) /* only list if tag is a function */
+                {
+                    if (!kind || (strcmp(kind, "function") && strcmp(kind, "prototype")))
+                        continue;
+                } else /* or a variable */
+                {
+                    //brc: add externvar for extern variables like cout
+                    if (!kind
 					        || (strcmp(kind, "variable") && strcmp(kind, "externvar")
 					            //brc: namespace workarround: add namespace
 					            && strcmp(kind, "namespace") && strcmp(kind, "member")))
 						continue;
-				}
+                }
 
-				/* need to duplicate the pattern, don't ask me why */
-				QString type = extractTypeQualifier(entry.address.pattern, ident);
+                /* need to duplicate the pattern, don't ask me why */
+                QString type = extractTypeQualifier(entry.address.pattern, ident);
 				if(tree)
 					tree->freeTree();
 				tagsClose(tfile);
 				return type;
-			}
-			while (tagsFindNext(tfile, &entry) == TagSuccess);
-		}
-		tagsClose(tfile);
-	}
-	return NULL;
+            } while (tagsFindNext(tfile, &entry) == TagSuccess);
+        }
+        tagsClose(tfile);
+    }
+    return NULL;
 }
 
 QString Parse::extractTypeQualifier(const QString &str, const QString &varName)
@@ -225,9 +217,9 @@ bool Parse::getTypeOfExpression(const QString &expr, Expression * exp, Scope * s
 	bool in_ident = false;	/* if the current position is within an identifier */
 	bool extract_ident = false;	/* if we extract the next string which looks like an identifier - only after: . -> and ( */
 
-	QByteArray array(expr.toLocal8Bit() ); 
-	if( !array.count() ) 
-		return false; 
+	QByteArray array(expr.toLocal8Bit() );
+    if (!array.size())
+        return false; 
 	unsigned long len = array.length(); 
 	const char *first = array.data(), *start = first + len;
 
@@ -374,10 +366,12 @@ extract:
 			if (type == "namespace")
 				old_type = "";
 			//<\end brc code>
-			type = getTypeOfToken(ident, old_type.toAscii(), scope,
-			                      scanForFuncdef(stack[num_stack]));
-		}
-	}
+            type = getTypeOfToken(ident,
+                                  old_type.toLatin1(),
+                                  scope,
+                                  scanForFuncdef(stack[num_stack]));
+        }
+    }
 	else			/* static member */
 		type = ident;
 	/* copy result into passed Expression argument */
@@ -427,24 +421,20 @@ Expression Parse::parseExpression(QString expression, Scope * scope, bool showAl
 	/* search for the type of the correct completion */
 	while (--len >= 0)
 	{
-		char last = ((const char*)expression.toAscii())[len];
-		switch (last)
-		{
-		case ' ':
-		case '\t':
-			/* skip initial spaces */
-			if (exp.access == AccessGlobal)
-			{
-				/*                    exp.access = ParseError;*/
+        char last = ((const char *) expression.toLatin1())[len];
+        switch (last) {
+        case ' ':
+        case '\t':
+            /* skip initial spaces */
+            if (exp.access == AccessGlobal) {
+                /*                    exp.access = ParseError;*/
 				continue;
-			}
-			else
-			{
-				exp.access = AccessGlobal;
+            } else {
+                exp.access = AccessGlobal;
 				goto extract;
-			}
+            }
 
-		case '>':
+        case '>':
 			if (len && expression[len - 1] == '-')
 			{
 				exp.access = AccessPointer;
@@ -490,21 +480,21 @@ Expression Parse::parseExpression(QString expression, Scope * scope, bool showAl
 			}
 			else
 				goto extract;
-		}
-	}
+        }
+    }
 
 extract:
 	/* now extract the type out of the string */
 	if (exp.access == AccessMembers || exp.access == AccessPointer
 	        || exp.access == AccessStatic || exp.access == AccessInFunction)
 	{
-		if (!getTypeOfExpression(expression.toAscii(), &exp, scope))
-			exp.access = ParseError;
-	}
+        if (!getTypeOfExpression(expression.toLatin1(), &exp, scope))
+            exp.access = ParseError;
+    }
 	else if (exp.access == AccessGlobal)
-		getScopeAndLocals(scope, expression.toAscii(), NULL);
+        getScopeAndLocals(scope, expression.toLatin1(), NULL);
 
-	return exp;
+    return exp;
 }
 
 Tag Parse::prettifyTag(const tagEntry * entry)
@@ -619,9 +609,9 @@ bool Parse::getScopeAndLocals(Scope * sc, const QString &expr, const QString &id
 
 	/* find the last entry, this is our current scope */
 	tagFileInfo info;
-	tagFile *tfile = tagsOpen(smallTagsFilePath.toAscii(), &info);
-	tagEntry entry;
-	const char *scope = NULL;
+    tagFile *tfile = tagsOpen(smallTagsFilePath.toLatin1(), &info);
+    tagEntry entry;
+    const char *scope = NULL;
 	if (tfile && info.status.opened)
 	{
 		if (tagsFirst(tfile, &entry) == TagSuccess)

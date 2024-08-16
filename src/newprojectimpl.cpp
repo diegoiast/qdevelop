@@ -195,8 +195,8 @@ void NewProjectImpl::on_okButton_clicked()
                 file.open(QIODevice::ReadOnly);
                 QByteArray data = file.readAll();
                 file.close();
-                data.replace("<class>Dialog</class>", "<class>"+l_uiObjectName.toAscii()+"</class>");
-                data.replace("name=\"Dialog\"", "name=\""+l_uiObjectName.toAscii()+"\"");
+                data.replace("<class>Dialog</class>", "<class>"+l_uiObjectName.toLatin1()+"</class>");
+                data.replace("name=\"Dialog\"", "name=\""+l_uiObjectName.toLatin1()+"\"");
                 QFile uiFile(l_uiDirectory + "/" + l_uiFilename.section(".ui", 0, 0) + ".ui");
                 uiFile.open(QIODevice::WriteOnly);
                 uiFile.write( data );
@@ -209,8 +209,8 @@ void NewProjectImpl::on_okButton_clicked()
                 file.open(QIODevice::ReadOnly);
                 QByteArray data = file.readAll();
                 file.close();
-                data.replace("<class>MainWindow</class>", "<class>"+l_uiObjectName.toAscii()+"</class>");
-                data.replace("name=\"MainWindow\"", "name=\""+l_uiObjectName.toAscii()+"\"");
+                data.replace("<class>MainWindow</class>", "<class>"+l_uiObjectName.toLatin1()+"</class>");
+                data.replace("name=\"MainWindow\"", "name=\""+l_uiObjectName.toLatin1()+"\"");
                 QFile uiFile(l_uiDirectory + "/" + l_uiFilename.section(".ui", 0, 0) + ".ui");
                 uiFile.open(QIODevice::WriteOnly);
                 uiFile.write( data );
@@ -222,14 +222,14 @@ void NewProjectImpl::on_okButton_clicked()
             file.open(QIODevice::ReadOnly);
             QByteArray data = file.readAll();
             file.close();
-            data.replace("$IMPL_H", QString( l_subclassFilename.section(".h", 0, 0).toUpper()+"_H" ).toAscii());
-            data.replace("$UIHEADERNAME", QString( "\"ui_"+l_uiFilename.section(".ui", 0, 0)+".h\"").toAscii());
-            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toAscii());
+            data.replace("$IMPL_H", QString( l_subclassFilename.section(".h", 0, 0).toUpper()+"_H" ).toLatin1());
+            data.replace("$UIHEADERNAME", QString( "\"ui_"+l_uiFilename.section(".ui", 0, 0)+".h\"").toLatin1());
+            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toLatin1());
             if ( dialog->isChecked() )
-                data.replace("$PARENTNAME", QString( "QDialog" ).toAscii());
+                data.replace("$PARENTNAME", QString( "QDialog" ).toLatin1());
             else
-                data.replace("$PARENTNAME", QString( "QMainWindow" ).toAscii());
-            data.replace("$OBJECTNAME", QString( l_uiObjectName ).toAscii());
+                data.replace("$PARENTNAME", QString( "QMainWindow" ).toLatin1());
+            data.replace("$OBJECTNAME", QString( l_uiObjectName ).toLatin1());
             QFile headerFile(l_srcDirectory + "/" + l_subclassFilename + ".h");
             headerFile.open(QIODevice::WriteOnly);
             headerFile.write( data );
@@ -241,12 +241,12 @@ void NewProjectImpl::on_okButton_clicked()
             data = file2.readAll();
             file2.close();
             QFile sourceFile(l_srcDirectory + "/" + l_subclassFilename + ".cpp");
-            data.replace("$HEADERNAME", QString( "\""+l_subclassFilename+".h\"" ).toAscii());
-            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toAscii());
+            data.replace("$HEADERNAME", QString( "\""+l_subclassFilename+".h\"" ).toLatin1());
+            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toLatin1());
             if ( dialog->isChecked() )
-                data.replace("$PARENTNAME", QString( "QDialog" ).toAscii());
+                data.replace("$PARENTNAME", QString( "QDialog" ).toLatin1());
             else
-                data.replace("$PARENTNAME", QString( "QMainWindow" ).toAscii());
+                data.replace("$PARENTNAME", QString( "QMainWindow" ).toLatin1());
             sourceFile.open(QIODevice::WriteOnly);
             sourceFile.write( data );
             sourceFile.close();
@@ -257,8 +257,8 @@ void NewProjectImpl::on_okButton_clicked()
             data = file3.readAll();
             file3.close();
             QFile mainFile(l_srcDirectory + "/" + "main.cpp");
-            data.replace("$HEADERNAME", QString( "\""+l_subclassFilename+".h\"" ).toAscii());
-            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toAscii());
+            data.replace("$HEADERNAME", QString( "\""+l_subclassFilename+".h\"" ).toLatin1());
+            data.replace("$CLASSNAME", QString( l_subclassObjectName ).toLatin1());
             mainFile.open(QIODevice::WriteOnly);
             mainFile.write( data );
             mainFile.close();
